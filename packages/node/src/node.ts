@@ -8,6 +8,9 @@ import { Base } from "@logtail/core";
 
 import { getStackContext } from "./context";
 
+const CONTEXT_OBJECT_MAX_DEPTH_DEFAULT : number = 20;
+const CONTEXT_OBJECT_MAX_DEPTH_WARN : boolean = process.env.LOGTAIL_CONTEXT_OBJECT_MAX_DEPTH_WARN === 'true';
+
 export class Node extends Base {
   /**
    * Readable/Duplex stream where JSON stringified logs of type `ILogtailLog`
@@ -91,7 +94,7 @@ export class Node extends Base {
     return buffer;
   }
 
-  private sanitizeForEncoding(value: any): any {
+  private sanitizeForEncoding(value: any, maxDepth: number = CONTEXT_OBJECT_MAX_DEPTH_DEFAULT): any {
     if (value === null || typeof value === "boolean" || typeof value === "number" || typeof value === "string") {
       return value;
     } else if (value instanceof Date) {
@@ -110,9 +113,12 @@ export class Node extends Base {
         const key = item[0];
         const value = item[1];
 
-        const result = this.sanitizeForEncoding(value);
+        const result = maxDepth > 0 ? this.sanitizeForEncoding(value, maxDepth-1) : undefined;
         if (result !== undefined){
           logClone[key] = result;
+        }
+        if (CONTEXT_OBJECT_MAX_DEPTH_WARN && maxDepth === 0) {
+          console.warn(`Logtail context: max depth (${CONTEXT_OBJECT_MAX_DEPTH_DEFAULT}) reached. You must not embeds too deep or circular references.`);
         }
       });
 
