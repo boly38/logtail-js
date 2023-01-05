@@ -11,7 +11,8 @@ module.exports = {
   testEnvironment: "node",
   // testMatch: ["**/*.test.ts", '"**/*.test.tsx'],
   testRegex: ".test.tsx?$",
-  testPathIgnorePatterns: ["/node_modules/", "/dist/"],
+  testPathIgnorePatterns: ["/node_modules/", "/dist/", "/packages/browser/", "/packages/bunyan/","/packages/core/",
+                           "/packages/koa/","/packages/winston/","/packages/tools/"],
   transform: {
     "^.+\\.(ts|tsx)$": "ts-jest"
   }
